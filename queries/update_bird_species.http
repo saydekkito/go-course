@@ -1,0 +1,7 @@
+PUT http://localhost:8080/bird_species/2
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "description": "Updated Description"
+}
