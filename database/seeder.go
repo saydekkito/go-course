@@ -27,5 +27,40 @@ func SeedDB() {
 		}
 	}
 
+	roles := []models.Role{
+		{Title: "admin"},
+		{Title: "user"},
+	}
+
+	for _, role := range roles {
+		_, err := DB.Exec("INSERT INTO roles(title) VALUES(?)", role.Title)
+		if err != nil {
+			log.Println("Наполнение базы: ошибка: ", err)
+		}
+	}
+
+	var adminRoleID, userRoleID int
+	err := DB.QueryRow("SELECT id FROM roles WHERE title = ?", "admin").Scan(&adminRoleID)
+	if err != nil {
+		log.Fatal("Ошибка при получении ID роли admin:", err)
+	}
+
+	err = DB.QueryRow("SELECT id FROM roles WHERE title = ?", "user").Scan(&userRoleID)
+	if err != nil {
+		log.Fatal("Ошибка при получении ID роли user:", err)
+	}
+
+	users := []models.User{
+		{Username: "admin", Password: "admin", RoleID: adminRoleID},
+		{Username: "user", Password: "user", RoleID: userRoleID},
+	}
+
+	for _, user := range users {
+		_, err := DB.Exec("INSERT INTO users(username, password, role_id) VALUES(?, ?, ?)", user.Username, user.Password, user.RoleID)
+		if err != nil {
+			log.Println("Наполнение базы: ошибка: ", err)
+		}
+	}
+
 	log.Println("Наполнение базы: успех")
 }
