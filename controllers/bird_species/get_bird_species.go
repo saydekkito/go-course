@@ -1,12 +1,12 @@
 package bird_species
 
 // TODO: добавить валидацию данных для всех контроллеров
-// TODO: допилить документацию
-// TODO: добавить фильтры, поиск по полям для get запросов
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/saydekkito/go-course/database"
@@ -14,16 +14,52 @@ import (
 )
 
 func GetAllBirdSpecies(w http.ResponseWriter, r *http.Request) {
-	rows, _ := database.DB.Query("SELECT id, title, description FROM bird_species;")
+	titleFilter := r.URL.Query().Get("title")
+	descFilter := r.URL.Query().Get("description")
+	sortOrder := strings.ToUpper(r.URL.Query().Get("sort"))
+	if sortOrder != "DESC" {
+		sortOrder = "ASC"
+	}
+
+	query := `SELECT id, title, description FROM bird_species`
+	var conditions []string
+	var args []interface{}
+
+	if titleFilter != "" {
+		conditions = append(conditions, "title LIKE ?")
+		args = append(args, "%"+titleFilter+"%")
+	}
+	if descFilter != "" {
+		conditions = append(conditions, "description LIKE ?")
+		args = append(args, "%"+descFilter+"%")
+	}
+
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	query += " ORDER BY title " + sortOrder
+
+	rows, err := database.DB.Query(query, args...)
+	if err != nil {
+		http.Error(w, "Ошибка при запросе к БД", http.StatusInternalServerError)
+		log.Println("Ошибка при запросе к БД:", err)
+		return
+	}
 	defer rows.Close()
 
-	var bird_species []models.BirdSpecies
+	var birdSpecies []models.BirdSpecies
 	for rows.Next() {
 		var bs models.BirdSpecies
-		rows.Scan(&bs.ID, &bs.Title, &bs.Description)
-		bird_species = append(bird_species, bs)
+		if err := rows.Scan(&bs.ID, &bs.Title, &bs.Description); err != nil {
+			log.Println("Ошибка сканирования строки:", err)
+			continue
+		}
+		birdSpecies = append(birdSpecies, bs)
 	}
-	json.NewEncoder(w).Encode(bird_species)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(birdSpecies)
 }
 
 func GetBirdSpecies(w http.ResponseWriter, r *http.Request) {
