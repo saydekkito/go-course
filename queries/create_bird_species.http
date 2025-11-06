@@ -1,4 +1,5 @@
 POST http://localhost:8080/bird_species
+Authorization: Bearer <токен>
 Content-Type: application/json
 
 {

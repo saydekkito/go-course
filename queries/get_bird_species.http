@@ -1,2 +1,2 @@
-GET http://localhost:8080/bird_species/1
+GET http://localhost:8080/bird_species/2
 Accept: application/json
