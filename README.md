@@ -14,15 +14,25 @@ REST API проект, предоставляющий взаимодействи
 ---
 Структура проекта:
 - controllers:
-    - bird_species_controller.go: контроллер для видов птиц.
+    - bird_species: контроллеры для видов птиц;
+    - auth.go: контроллер для авторизации;
+    - role.go: контроллер для ролей;
+    - user.go: контроллер для пользователей.
 - database:
-    - database/database.go: реализация подключения к БД и создания таблицы;
-    - database/seed.go: наполнение БД.
+    - migrations: миграции;
+    - connect.go: реализация подключения к БД;
+    - seeder.go: наполнение БД.
+- middleware:
+    - jwt.go: middleware для JWT-токенов.
 - models:
-    - bird_species.go: модель видов птиц.
+    - bird_species.go: модель видов птиц;
+    - role.go: модель ролей;
+    - user.go: модель пользователей.
 - queries: тестовые запросы.
 - routes:
     - routes.go: endpoints API.
+- utils:
+    - env.go: util для работы с переменными окружения.
 
 
 ---
@@ -30,7 +40,9 @@ REST API проект, предоставляющий взаимодействи
 1. git clone https://github.com/saydekkito/go-course.git
 2. cd go-course
 3. go mod tidy
-4. go run main.go
-5. Тестовые запросы лежат в папке queries.
+4. touch .env
+5. Добавить в файл .env переменные PORT и JWT_SECRET.
+6. go run main.go
+7. Тестовые запросы лежат в папке queries.
 
 ---
